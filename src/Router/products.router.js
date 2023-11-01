@@ -77,7 +77,7 @@ router.put('/:pid', async (req, res) => {
         }
 
         const actualizado = req.body;
-        const productoEncontrado = productos.find(item => item.id === productId); // Corregido
+        const productoEncontrado = productos.find(item => item.id === productId); // 
 
         if (!productoEncontrado) {
             return res.status(404).json({ error: `El producto con el id ${productId} no existe` });
@@ -98,7 +98,7 @@ router.delete('/:pid', async (req, res) => {
     try {
         const productId = parseInt(req.params.pid);
         const productos = await productManager.getProducts();
-        const productoEncontrado = productos.find(item => item.id === productId); // Corregido
+        const productoEncontrado = productos.find(item => item.id === productId);
 
         if (!productoEncontrado) {
             return res.status(404).json({ error: `El producto con el id ${productId} no existe` });

@@ -27,7 +27,7 @@ app.engine('handlebars', handlebars.engine())
 app.set('view engine', 'handlebars')
 
 
-app.get('/', (req, res) => res.status(200).render('index', { name: ' '}))
+app.get('/', (req, res) => res.status(200).render('index', { name: 'Usuario '}))
 app.use('/api/products', productsRouter)
 app.use('/api/carts', cartsRouter)
  app.use('/home', viewsRouter)
