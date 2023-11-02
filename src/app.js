@@ -12,6 +12,8 @@ const app = express()
 app.use(express.json())
  
 
+ 
+
 const httpServer = app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`))
 httpServer.on('error', err => console.log(`Express server error: ${err.message}`))
 
@@ -26,6 +28,10 @@ app.set('views', `${__dirname}/views`)
 app.engine('handlebars', handlebars.engine())
 app.set('view engine', 'handlebars')
 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('¡Algo salió mal!');
+  })
 
 app.get('/', (req, res) => res.status(200).render('index', { name: 'Usuario '}))
 app.use('/api/products', productsRouter)

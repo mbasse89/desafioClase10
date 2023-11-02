@@ -2,6 +2,7 @@ import { Router } from 'express'
 import ProductManager from '../ProductManager/ProductManager.js'
 
 const router = Router()
+const productManager = new ProductManager(); 
 
 router.get('/', async (req, res) => {
     try {
@@ -17,7 +18,8 @@ router.get('/', async (req, res) => {
 
 router.get('/realTimeProducts', async (req, res) => {
     try {
-        const allProducts = await ProductManager.getProducts()
+        
+        const allProducts = await productManager.getProducts()
         res.render('realTimeProducts', { allProducts })
     } catch (error) {
         console.log(error)
