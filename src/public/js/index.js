@@ -1,118 +1,124 @@
 const socket = io()
 
-const form = document.getElementById('form')
-const productsTable = document.querySelector('#productsTable')
-const tbody = productsTable.querySelector('#tbody')
+const form = document.getElementById("form")
+const productsTable = document.querySelector("#productsTable")
+const tbody = productsTable.querySelector("#tbody")
 
-form.addEventListener('submit', async (e) => {
+const title = document.querySelector("#title")
+const description = document.querySelector("#description")
+const price = document.querySelector("#price")
+const code = document.querySelector("#code")
+const category = document.querySelector("#category")
+const stock = document.querySelector("#stock")
+
+form.addEventListener("submit", async (e) => {
     e.preventDefault()
 
     let product = {
-        title: document.querySelector('#title').value,
-        description: document.querySelector('#description').value,
-        price: document.querySelector('#price').value,
-        code: document.querySelector('#code').value,
-        category: document.querySelector('#category').value,
-        stock: document.querySelector('#stock').value,
+        title: title.value,
+        description: description.value,
+        price: price.value,
+        code: code.value,
+        category: category.value,
+        stock: stock.value,
     }
 
-    const res = await fetch('/api/products', {
-        method: 'POST',
+    const res = await fetch("/api/products", {
+        method: "POST",
         body: JSON.stringify(product),
         headers: {
-            'Content-Type': 'application/json',
-        }
+        "Content-Type": "application/json",
+        },
     })
 
     try {
         const result = await res.json()
-        if (result.status === 'error') {
-            throw new Error(result.error)
+        if (result.status === "error") {
+        throw new Error(result.error)
         } else {
-            const resultProducts = await fetch('/api/products')
-            const results = await resultProducts.json()
+        const resultProducts = await fetch("/api/products")
+        const results = await resultProducts.json()
 
-            if (results.status === 'error') {
-                throw new Error(results.error)
-            } else {
-                socket.emit('productList', results.products)
+        if (results.status === "error") {
+            throw new Error(results.error)
+        } else {
+            socket.emit("productList", results.products)
 
-                Toastify({
-                    text: 'New product added successfully',
-                    duration: 2000,
-                    newWindow: true,
-                    close: true,
-                    gravity: 'top', // `top` or `bottom`
-                    position: 'right', // `left`, `center` or `right`
-                    stopOnFocus: true, // Prevents dismissing of toast on hover
-                    style: {
-                        background: '#32CD32',
-                        borderRadius: '10px',
-                        fontWeight: '600',
-                    },
-                    onClick: function(){} // Callback after click
-                }).showToast()
-
-                document.querySelector('#title').value = ''
-                document.querySelector('#description').value = ''
-                document.querySelector('#price').value = ''
-                document.querySelector('#code').value = ''
-                document.querySelector('#category').value = ''
-                document.querySelector('#stock').value = ''
-            }
-        }            
-    } catch (error) {
-        console.log(error)
-    }
-})
-
-const deleteProduct = async (id) => {
-    try {
-        const res = await fetch(`/api/products/${id}`, {
-            method: 'DELETE',
-        })
-        const result = await res.json()
-
-        if (result.status === 'error') throw new Error(result.error)
-        else socket.emit('productList', result.products)
-
-        Toastify({
-            text: 'Product removed successfully',
+            Toastify({
+            text: "Nuevo producto agregado exitosamente",
             duration: 2000,
             newWindow: true,
             close: true,
-            gravity: 'bottom', // `top` or `bottom`
-            position: 'right', // `left`, `center` or `right`
+            gravity: "top", // `top` or `bottom`
+            position: "right", // `left`, `center` or `right`
             stopOnFocus: true, // Prevents dismissing of toast on hover
             style: {
-                background: '#DC143C',
-                borderRadius: '10px',
-                fontWeight: '600',
+                background: "#7dd56f",
+                borderRadius: "10px",
+                fontWeight: "600",
             },
-            onClick: function(){} // Callback after click
-        }).showToast()
+            onClick: function () {}, // Callback after click
+            }).showToast();
 
-    } catch (error) {
-        console.log(error)
+            title.value = ""
+            description.value = ""
+            price.value = ""
+            code.value = ""
+            category.value = ""
+            stock.value = ""
+        }
+        }
+    } catch (err) {
+        console.log(err)
     }
-}
+    });
 
-socket.on('updatedProducts', products => {      
-    tbody.innerHTML = ''
+    const deleteProduct = async (id) => {
+    try {
+        const res = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+        })
+        const result = await res.json()
 
-    products.forEach(item => {              
-        const tr = document.createElement('tr')
+        if (result.status === "error") throw new Error(result.error)
+        else socket.emit("productList", result.products)
+
+        Toastify({
+        text: "Producto eliminado exitosamente",
+        duration: 2000,
+        newWindow: true,
+        close: true,
+        gravity: "bottom", // `top` or `bottom`
+        position: "right", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+            background: "#E93C3C",
+            borderRadius: "10px",
+            fontWeight: "600",
+        },
+        onClick: function () {}, // Callback after click
+        }).showToast()
+    } catch (err) {
+        console.log(err)
+    }
+    }
+
+    socket.on("updatedProducts", (products) => {
+    tbody.innerHTML = ""
+
+    products.forEach((item) => {
+        const tr = document.createElement("tr")
         tr.innerHTML = `
-            <td>${item.title}</td>
-            <td>${item.description}</td>
-            <td>${item.price}</td>
-            <td>${item.code}</td>
-            <td>${item.category}</td>
-            <td>${item.stock}</td>
-            <td>
-                <button class='btn btn-danger' onclick='deleteProduct(${item.id})' id='btnDelete'>Eliminar</button>
-            </td>
-        `
+                <td>${item.title}</td>
+                <td>${item.description}</td>
+                <td>${item.price}</td>
+                <td>${item.code}</td>
+                <td>${item.category}</td>
+                <td>${item.stock}</td>
+                <td>
+                    <button class='btn btn-danger text-white' onclick="deleteProduct('${item._id}')" id='btnDelete'>Eliminar</button> 
+                </td>
+            `
         tbody.appendChild(tr)
     })
-}) 
+})

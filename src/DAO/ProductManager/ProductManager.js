@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import { __dirname } from '../../utils.js'
 
 export default class ProductManager {
     // Constructor que recibe la ruta del archivo de la base de datos

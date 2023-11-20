@@ -1,48 +1,59 @@
-import { Router } from "express";
-import { CartManager } from "../ProductManager/CartManager.js";
+import { Router } from 'express'      
+import productModel from '../DAO/models/productModel.js'
+import cartModel from '../DAO/models/cartModel.js'
 
-const router = Router();
-const cartManager = new CartManager();
+const router = Router()
 
-// Ruta para obtener una lista de carritos
-router.get('/', async (req, res) => {
-    try {
-        const carts = await cartManager.getCarts();
-        res.send(carts);
-    } catch (err) {
-        res.status(500).send("Error al obtener los carritos: " + err);
-    }
-});
-
-// Ruta para obtener un carrito específico por ID
-router.get('/:cid', async (req, res) => {
-    const id = parseInt(req.params.cid);
-    const cart = await cartManager.getCartById(id);
-    res.send(cart);
-});
-
-// Ruta para crear un nuevo carrito
 router.post('/', async (req, res) => {
     try {
-        // Llamar al método 'createCart' del gestor de carritos para crear un nuevo carrito
-        const cart = await cartManager.createCart();
-        res.send(cart);
+        const cart = req.body
+        const addCart = await cartModel.create(cart)
+        res.json({ status: 'success', payload: addCart })
     } catch (err) {
-        res.status(500).send("Error al crear el carrito: " + err);
+        return res.status(500).json({ status: 'error', error: err.message })
     }
-});
+})
 
-// Ruta para agregar un producto a un carrito específico
 router.post('/:cid/product/:pid', async (req, res) => {
     try {
-        // Obtener los IDs del carrito y del producto desde los parámetros de la URL
-        const cid = parseInt(req.params.cid);
-        const pid = parseInt(req.params.pid);
-        const product = await cartManager.addProductInCart(cid, pid);
-        res.send(product);
-    } catch (err) {
-        res.status(500).send("Error al agregar producto al carrito: " + err);
-    }
-});
+        const pid = req.params.pid
+        const product = await productModel.findById(pid)
+        if (!product) {
+            return res.status(404).json({ status: 'error', error: 'Invalid product' })
+        }
 
-export default router;
+        const cid = req.params.cid
+        const cart = await cartModel.findById(cid)
+        if (!cart) {
+            return res.status(404).json({ status: 'error', error: 'Invalid cart' })
+        }
+
+        const existingProductIndex = cart.products.findIndex(item => item.product.toString() === pid)
+        if (existingProductIndex !== -1) {
+            cart.products[existingProductIndex].quantity += 1
+        } else {
+            const newProduct = {
+                product: pid,
+                quantity: 1,
+            }
+            cart.products.push(newProduct)
+        }
+        const result = await cart.save()
+        res.status(200).json({ status: "success", payload: result })
+    } catch (err) {
+        return res.status(500).json({ status: 'error', error: err.message })
+    }
+})
+
+router.get('/:cid', async (req, res) => {
+    try {
+        const cartId = req.params.cid
+        const cart = await cartModel.findById(cartId)
+        if (!cart) return res.status(404).json({ error: `The cart with id ${cartId} does not exist` })
+        res.status(200).json({ status:'success', payload: cart})
+    } catch (err) {
+        return res.status(500).json({ status: 'error', error: err.message })
+    }
+})
+
+export default router
